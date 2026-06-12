@@ -38,3 +38,10 @@ reflects energy production capacity.
 🔨 In active development — Week 1 of 8
 
 ## Architecture
+NVE HydAPI ──→ Python extract ──→ PostgreSQL raw
+│
+dbt models
+│
+PySpark jobs
+│
+Streamlit dashboard

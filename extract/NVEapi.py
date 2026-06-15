@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 from datetime import datetime
 import json
 import logging
+import pandas as pd
 ###############################
 
 load_dotenv() #to load the API key
@@ -102,6 +103,42 @@ def save_raw(data,station_id):
     
     return file_name
 
+                    #######............. Block-4...........########
+"""
+    Convert raw NVE JSON into a flat pandas DataFrame.
+"""
+def json_to_data_frame(data):
+    
+    #Step-1: first station
+    station = data['data'][0]
+    station_id = station['stationId'] # to avoid keyerror the key name must have to be same as json key like stationID, unit
+    station_name = station['stationName']
+    unit = station['unit']
+    
+    #Step 2: list of observation
+    observation = station['observations']
+    
+    #Stetp 3: building rows
+    rows = []
+    for obs in observation:
+        rows.append({
+            'station_id': station_id,
+            'station_name': station_name,
+            'time': obs['time'],
+            'value': obs['value'],
+            'correction': obs['correction'],
+            'quality': obs['quality'],
+            'unit': unit
+        })
+     #Step 4: convert into dataframe   
+    df = pd.DataFrame(rows)
+    return df
+
+
+
+
+
+
 if __name__ == "__main__":
     if API_read:
         print(f"The API Key is: {API_read[:6]}")
@@ -122,6 +159,9 @@ if __name__ == "__main__":
     #### for block-3 save data......
     file_name = save_raw(data, '12.228.0')
     
+    #### for block-4 pandas data
+    df = json_to_data_frame(data)
+    
     # print the return values
     print(f'\nTop level keys: {list(data.keys())}')
     print(f'Item count: {data.get('itemCount')}')
@@ -140,3 +180,6 @@ if __name__ == "__main__":
                 f"{obs['value']:.2f} m³/s  "
                 f" correction: {obs['correction']} "
                 f"quality: {obs['quality']}")
+        
+    print('\nData Frame preview: ')
+    print(df.head())

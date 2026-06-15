@@ -1,0 +1,17 @@
+extract/nve.py
+    Block 1  ->  imports + setup
+    Block 2  ->  fetch from API
+    Block 3  -> save raw JSON
+    Block 4  ->  convert to DataFrame
+    Block 5  ->  main extract() function
+
+transform/clean.py
+    clean columns
+    fix data types
+    filter quality >= 2
+    return clean DataFrame
+
+load/postgres.py
+    connect to PostgreSQL
+    write DataFrame to table
+    confirm rows loaded

@@ -99,7 +99,7 @@ def save_raw(data,station_id):
     with open(file_name, 'w') as f:
         json.dump(data, f, indent=2)
     
-    print(f'Raw data saved: {file_name}')
+    #print(f'Raw data saved: {file_name}')
     
     return file_name
 
@@ -134,10 +134,27 @@ def json_to_data_frame(data):
     df = pd.DataFrame(rows)
     return df
 
-
-
-
-
+###............. Block-5: Main extract() function ...............###
+"""
+    Full extract process:
+    1. Fetch raw JSON from NVE API
+    2. Save raw JSON to file
+    3. Convert JSON to pandas DataFrame
+"""
+def extract(station_id, parameter,resolution,days_back=3):
+    #Step-1: Fetch data
+    data = fetch_station(
+        station_id= station_id,
+        parameter= parameter,
+        resolution= resolution,
+        days_back= days_back
+    )
+    #step-2: save raw JSON
+    file_name = save_raw(data, station_id)
+    #step-3: json to pandas data frame
+    df = json_to_data_frame(data)
+    
+    return df, file_name
 
 if __name__ == "__main__":
     if API_read:
@@ -149,30 +166,44 @@ if __name__ == "__main__":
     ##### for block-2 fetch dat.....   
     # Fetch real data — Kistefoss station, Randselva 
     # Parameter 1001 = river discharge in m³/s
+    ### we do not need this after running block 5 it will make repetation, butto check for block 1 we can keep it for block 1 to check only
+    '''
     data = fetch_station(
         station_id= "12.228.0",
         parameter= '1001',
         resolution= '60',
         days_back= 3
-    )
+        )
+    '''
+    
     
     #### for block-3 save data......
-    file_name = save_raw(data, '12.228.0')
+    #file_name = save_raw(data, '12.228.0')
     
     #### for block-4 pandas data
-    df = json_to_data_frame(data)
+    #df = json_to_data_frame(data)
     
+    #for block 5 extract
+    df, file_name = extract(
+        station_id= '12.228.0',
+        parameter= '1001',
+        resolution= '60',
+        days_back= 3
+    )
     # print the return values
-    print(f'\nTop level keys: {list(data.keys())}')
-    print(f'Item count: {data.get('itemCount')}')
+    #after calling extract() (Block 5) we do not need it
+    #print(f'\nTop level keys: {list(data.keys())}') 
+    #print(f'Item count: {data.get('itemCount')}')
     
     # First series
+    #####......after calling extract() (Block 5) we do not need it.....####
+    '''
     first = data["data"][0]
     print(f"\nStation name : {first['stationName']}")
     print(f"Parameter    : {first['parameterNameEng']}")
     print(f"Unit         : {first['unit']}")
     print(f"Observations : {first['observationCount']}")
-
+    
         # First 5 readings
     print(f"\nFirst 5 readings:")
     for obs in first["observations"][:5]:
@@ -180,6 +211,10 @@ if __name__ == "__main__":
                 f"{obs['value']:.2f} m³/s  "
                 f" correction: {obs['correction']} "
                 f"quality: {obs['quality']}")
-        
+    '''
+    #after block 5
+    print('\nExtract complet')
+    print(f'Raw file saved: {file_name}')
+    #after block 4    
     print('\nData Frame preview: ')
     print(df.head())

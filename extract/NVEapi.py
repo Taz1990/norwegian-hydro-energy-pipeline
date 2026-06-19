@@ -111,7 +111,7 @@ def json_to_data_frame(data):
     
     #Step-1: first station
     station = data['data'][0]
-    station_id = station['stationId'] # to avoid keyerror the key name must have to be same as json key like stationID, unit
+    station_id = station['stationId'] # to avoid key error the key name must have to be same as json key like stationID, unit
     station_name = station['stationName']
     unit = station['unit']
     
@@ -160,6 +160,15 @@ if __name__ == "__main__":
     if API_read:
         print(f"The API Key is: {API_read[:6]}")
         print(f'The base api url is: {base_api_url}')
+        
+        print('\nExtract Start!!!!')
+         #for block 5 extract
+        df, file_name = extract(
+            station_id= '12.228.0',
+            parameter= '1001',
+            resolution= '60',
+            days_back= 3
+        )
     else:
         print('There is an error! in .env')
     
@@ -183,13 +192,6 @@ if __name__ == "__main__":
     #### for block-4 pandas data
     #df = json_to_data_frame(data)
     
-    #for block 5 extract
-    df, file_name = extract(
-        station_id= '12.228.0',
-        parameter= '1001',
-        resolution= '60',
-        days_back= 3
-    )
     # print the return values
     #after calling extract() (Block 5) we do not need it
     #print(f'\nTop level keys: {list(data.keys())}') 
@@ -213,8 +215,11 @@ if __name__ == "__main__":
                 f"quality: {obs['quality']}")
     '''
     #after block 5
-    print('\nExtract complet')
     print(f'Raw file saved: {file_name}')
+    print('\nExtract complete')
+    
     #after block 4    
     print('\nData Frame preview: ')
     print(df.head())
+    print(f"\nShape: {df.shape}")
+    print(f"\nData types: {df.dtypes}")

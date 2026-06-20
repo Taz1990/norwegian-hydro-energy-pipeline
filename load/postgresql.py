@@ -1,0 +1,80 @@
+                    #####.............. Block 7: load cleaned data to Postgresql.............#####
+
+import os
+import psycopg2
+import psycopg2.extras
+import pandas as pd
+from dotenv import load_dotenv
+
+load_dotenv() #to load theAPI key
+
+"""
+Create a PostgreSQL connection using environment variables.
+"""
+def connect_db():
+    
+    conn = psycopg2.connect(
+        host=os.getenv('PG_HOST'),
+        database=os.getenv('PG_DATABASE'),
+        user=os.getenv('PG_USER'),
+        password=os.getenv('PG_PASSWORD'),
+        port=os.getenv('PG_PORT')
+    )
+    return conn
+def load_to_postgresql(df):
+    """
+    Load cleaned DataFrame into raw_discharge table.
+    """
+    
+    conn = connect_db()
+    curs = conn.cursor()
+    insert_quary= """
+        INSERT INTO raw_discharge(
+            station_id,
+            station_name,
+            time,
+            value,
+            quality,
+            unit,
+            load_timestamp
+        )
+        VALUES %s
+        ON CONFLICT (station_id, time) DO NOTHING;
+        
+    """
+    # Keep only the columns that exist in the SQL table
+    df = df[["station_id", "station_name", "time", "value", "quality", "unit", "load_timestamp"]]
+    
+    # Convert df to list of tuples
+    records = list(df.itertuples(index=False, name=None))
+    
+    psycopg2.extras.execute_values(
+        curs,
+        insert_quary,
+        records,
+        template=None,
+        page_size= 1000
+    )
+    conn.commit()
+    conn.close()
+    curs.close()
+    
+    return len(records)
+
+    
+
+
+if __name__ == "__main__":
+    from extract.NVEapi import extract
+    from transform.clean import transform
+    df, file_name = extract(
+        station_id='12.228.0',
+        parameter='1001',
+        resolution='60',
+        days_back= 3
+    )
+    clean_data = transform(df)
+    rows= load_to_postgresql(clean_data)
+    print(f'Inserted rows: {rows}')
+    print(clean_data)
+    

@@ -12,7 +12,7 @@ import logging
 import pandas as pd
 ###############################
 
-load_dotenv() #to load the API key
+load_dotenv() #to load the API key and docker keys from .env
 
 API_read = os.getenv("NVE-API-KEY") #get API
 #print(API_read)

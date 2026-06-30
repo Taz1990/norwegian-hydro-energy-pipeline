@@ -10,7 +10,7 @@ def clean_dataframe(df):
     df = df.sort_values('time')
     
     # step 3: Drop duplicates
-    df = df.drop_duplicates(subset=['station_id', 'time'])
+    df = df.drop_duplicates(subset=['station_id', 'time'])# in time series ETL pipeline these two represents unique keys
     
     #step 4: Add load Timestamp
     df['load_timestamp'] = pd.Timestamp.now('UTC')
@@ -34,3 +34,10 @@ if __name__ == "__main__":
         )
     clean_data = transform(df)
     print(clean_data.head)
+    
+    print(len(clean_data))
+    print(clean_data[:3])
+'''
+As extract is outside transform folder it will show module not found error if we will run this programm directly
+To avoid it run "python -m transform.clean" inside terminal as a command.
+'''

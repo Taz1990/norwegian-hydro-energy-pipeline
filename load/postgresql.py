@@ -2,14 +2,15 @@
 
 import os
 import psycopg2
-import psycopg2.extras
+import psycopg2.extras # that gives advanced PostgreSQL features 
 import pandas as pd
 from dotenv import load_dotenv
 
-load_dotenv() #to load theAPI key
+load_dotenv() #to load theAPI key and other variables into Docker for postgresql
 
 """
-Create a PostgreSQL connection using environment variables.
+Create a PostgreSQL connection using environment variables which are inside .env file.
+connect_db() reads .env values and uses them to open a PostgreSQL connection using psycopg2.
 """
 def connect_db():
     
@@ -24,11 +25,15 @@ def connect_db():
 def load_to_postgresql(df):
     """
     Load cleaned DataFrame into raw_discharge table.
+    This function takes a cleaned DataFrame, converts it to tuples,
+    and inserts all rows into the raw_discharge table in PostgreSQL
     """
     
     conn = connect_db()
+    #A cursor is the object that sends SQL commands to PostgreSQL.
     curs = conn.cursor()
-    insert_quary= """
+    # the table raw_discharge has been created before inside docker to postgresql DB using command prompt now insert the values into the table
+    insert_query= """
         INSERT INTO raw_discharge(
             station_id,
             station_name,
@@ -50,14 +55,15 @@ def load_to_postgresql(df):
     
     psycopg2.extras.execute_values(
         curs,
-        insert_quary,
+        insert_query,
         records,
         template=None,
         page_size= 1000
     )
-    conn.commit()
-    conn.close()
-    curs.close()
+    conn.commit() #saves the changes into PostgreSQL
+    curs.close() #close SQL command tool
+    conn.close() #close database connection
+    
     
     return len(records)
 

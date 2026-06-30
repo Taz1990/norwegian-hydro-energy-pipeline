@@ -1,0 +1,55 @@
+###########........docker-compose.yml........###########
+# Start:  docker compose up -d
+# Stop:   docker compose down
+version: "3.8"
+services: # contaier for the database , name: services can not be changed
+  postgre_db: # it is a name that connects the container like services airflow web-server airflow scheduler etc
+    image: postgres:16-alpine # alpine for smaller image
+    container_name: hydro_postgres
+    restart: unless-stopped # restart if it crashes
+
+    environment: # from .env file
+      POSTGRE_DATABASE= ${PG_DATABASE}
+      POSTGRE_USER=  ${PG_USER}
+      POSTGRE_PASSWORD= ${PG_PASSWORD}
+
+    ports:
+      - "${PG_PORT}:5432"
+
+    volumes: # to save the database into local machine so that data would not vanish after restart
+      - postgres_data:/var/lib/postgresql/data # postgres_data: folder name could be anything
+        # '/var/lib/postgresql/data' not changable
+      #The very first time when I build this database, docker automatically look inside my local project folder, find my SQL script, and run it to set up my tables."
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/01_init.sql
+
+      # The health check to check if the database is accepting query or not
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${PG_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    networks:
+      - hydro_net # to connect all the containers which use the same network
+
+  # airflow:
+  #   image: apache/airflow:2.7.1
+  #   depends_on:
+  #     - postgres
+  #   networks:
+  #     - hydro_net
+  #   ...
+
+  # streamlit:
+  #   image: python:3.11
+  #   networks:
+  #     - hydro_net
+  #   ...
+
+  volumes:
+    postgres_data: # it contains all the database or multiple database inside it not only the "hydro" database
+      driver: local
+
+  networks:
+    hydro_net:
+      driver: bridge

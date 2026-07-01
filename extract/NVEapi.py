@@ -71,8 +71,13 @@ def fetch_station(station_id, parameter,resolution,days_back=3):
     
     print(f"status code: {response.status_code}") 
     
-    data= response.json()
-    return data    
+    # If API returns 404 or any non-200 → return None
+    if response.status_code != 200:
+        print(f"No data found for station {station_id}.")
+        return None
+    
+    return response.json()
+      
 
 ###............. Block-3: Save raw JSON...............###
 """
@@ -149,11 +154,17 @@ def extract(station_id, parameter,resolution,days_back=3):
         resolution= resolution,
         days_back= days_back
     )
-    #step-2: save raw JSON
+     #  If API returned no data (404), skip this station
+    if data is None:
+        print(f"No data for station {station_id}. Skipping.")
+        return None
+
+    # Step 2 — Save raw JSON
     file_name = save_raw(data, station_id)
-    #step-3: json to pandas data frame
+
+    # Step 3 — Convert JSON to DataFrame
     df = json_to_data_frame(data)
-    
+
     return df, file_name
 
 if __name__ == "__main__":

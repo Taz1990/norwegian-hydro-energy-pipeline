@@ -2,16 +2,16 @@
 # Start:  docker compose up -d
 # Stop:   docker compose down
 version: "3.8"
-services: # contaier for the database , name: services can not be changed
+services: # contaier for the database , name: 'services' can not be changed
   postgre_db: # it is a name that connects the container like services airflow web-server airflow scheduler etc
     image: postgres:16-alpine # alpine for smaller image
     container_name: hydro_postgres
     restart: unless-stopped # restart if it crashes
 
     environment: # from .env file
-      POSTGRE_DATABASE= ${PG_DATABASE}
-      POSTGRE_USER=  ${PG_USER}
-      POSTGRE_PASSWORD= ${PG_PASSWORD}
+      POSTGRES_DB: ${PG_DATABASE}
+      POSTGRES_USER: ${PG_USER}
+      POSTGRES_PASSWORD: ${PG_PASSWORD}
 
     ports:
       - "${PG_PORT}:5432"
@@ -46,10 +46,10 @@ services: # contaier for the database , name: services can not be changed
   #     - hydro_net
   #   ...
 
-  volumes:
-    postgres_data: # it contains all the database or multiple database inside it not only the "hydro" database
-      driver: local
+volumes:
+  postgres_data: # it contains all the database or multiple database inside it not only the "hydro" database
+    driver: local
 
-  networks:
-    hydro_net:
-      driver: bridge
+networks:
+  hydro_net:
+    driver: bridge

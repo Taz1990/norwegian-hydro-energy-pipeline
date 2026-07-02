@@ -9,6 +9,8 @@ import logging
 from extract.NVEapi import extract
 from transform.clean import transform
 from load.postgresql import load_to_postgresql
+from dotenv import load_dotenv
+import os 
 
 logging.basicConfig(
     level=logging.INFO,
@@ -46,12 +48,10 @@ def multi_station_pipeline(stations, days_back=3):
 
 
 if __name__ == "__main__":
-    stations = [
-        "12.228.0",  # Kistefoss
-        "12.131.0",  # Hønefoss
-        "12.214.0",  # Randselva
-        "12.250.0",  # Åmodt
-        "12.310.0",  # Sandvika
-    ]
+    
+    load_dotenv()
+
+    raw_stations = os.getenv("STATIONS").split(",")
+    stations = [item.split(":")[0] for item in raw_stations]
 
     multi_station_pipeline(stations)

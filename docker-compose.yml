@@ -7,9 +7,10 @@ services: # contaier for the database , name: 'services' can not be changed
     image: postgres:16-alpine # alpine for smaller image
     container_name: hydro_postgres
     restart: unless-stopped # restart if it crashes
-
+    env_file:
+      - .env
     environment: # from .env file
-      POSTGRES_DB: ${PG_DATABASE}
+      POSTGRES_DB: ${PG_DATABASE} #POSTGRES_DB cann't be changed to any other name, it is fixed and also user and password
       POSTGRES_USER: ${PG_USER}
       POSTGRES_PASSWORD: ${PG_PASSWORD}
 
@@ -24,7 +25,7 @@ services: # contaier for the database , name: 'services' can not be changed
 
       # The health check to check if the database is accepting query or not
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${PG_USER}"]
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -32,13 +33,60 @@ services: # contaier for the database , name: 'services' can not be changed
     networks:
       - hydro_net # to connect all the containers which use the same network
 
-  # airflow:
-  #   image: apache/airflow:2.7.1
-  #   depends_on:
-  #     - postgres
-  #   networks:
-  #     - hydro_net
-  #   ...
+  # This service runs once to initialize Airflow's metadata tables
+  airflow_init:
+    image: apache/airflow:2.7.1-python3.11
+    depends_on:
+      postgre_db:
+        condition: service_healthy # Waits until your custom tables are created
+    env_file:
+      - .env
+    environment:
+      AIRFLOW__CORE__SQL_ALCHEMY_CONN: "postgresql+psycopg2://${PG_USER}:${PG_PASSWORD}@postgre_db:5432/${PG_DATABASE}"
+    # Fix: Put the entrypoint and command into a single valid bash execution block
+    command: >
+      bash -c "airflow db init && 
+      airflow users create --username airflow --password airflow --firstname Admin --lastname Admin --role Admin --email admin@example.com"
+    networks:
+      - hydro_net
+
+  airflow_webserver:
+    image: apache/airflow:2.7.1-python3.11
+    container_name: airflow_webserver
+    restart: unless-stopped
+    depends_on:
+      - postgre_db
+    env_file:
+      - .env
+    environment:
+      AIRFLOW__CORE__SQL_ALCHEMY_CONN: "postgresql+psycopg2://${PG_USER}:${PG_PASSWORD}@postgre_db:5432/${PG_DATABASE}"
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    command: airflow webserver
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./extract:/opt/airflow/extract
+    ports:
+      - "8080:8080"
+    networks:
+      - hydro_net
+
+  airflow_scheduler:
+    image: apache/airflow:2.7.1-python3.11
+    container_name: airflow_scheduler
+    restart: unless-stopped
+    depends_on:
+      - postgre_db
+    env_file:
+      - .env
+    environment:
+      AIRFLOW__CORE__SQL_ALCHEMY_CONN: "postgresql+psycopg2://${PG_USER}:${PG_PASSWORD}@postgre_db:5432/${PG_DATABASE}"
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    command: airflow scheduler
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./extract:/opt/airflow/extract
+    networks:
+      - hydro_net
 
   # streamlit:
   #   image: python:3.11

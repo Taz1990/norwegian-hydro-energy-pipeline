@@ -59,12 +59,18 @@ services: # contaier for the database , name: 'services' can not be changed
     env_file:
       - .env
     environment:
+      NVE_API_KEY: "${NVE_API_KEY}"
       AIRFLOW__CORE__SQL_ALCHEMY_CONN: "postgresql+psycopg2://${PG_USER}:${PG_PASSWORD}@postgre_db:5432/${PG_DATABASE}"
+      AIRFLOW__CORE__FERNET_KEY: "ggiJU6dFtJRvN_0nlYqoSUG6KlSutrOnvjVbtB3sGZA="
+      AIRFLOW__WEBSERVER__SECRET_KEY: "taz_secret_key"
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      PYTHONPATH: /opt/airflow
     command: airflow webserver
     volumes:
       - ./dags:/opt/airflow/dags
       - ./extract:/opt/airflow/extract
+      - ./transform:/opt/airflow/transform
+      - ./load:/opt/airflow/load
     ports:
       - "8080:8080"
     networks:
@@ -79,12 +85,18 @@ services: # contaier for the database , name: 'services' can not be changed
     env_file:
       - .env
     environment:
+      NVE_API_KEY: "${NVE_API_KEY}"
       AIRFLOW__CORE__SQL_ALCHEMY_CONN: "postgresql+psycopg2://${PG_USER}:${PG_PASSWORD}@postgre_db:5432/${PG_DATABASE}"
+      AIRFLOW__CORE__FERNET_KEY: "ggiJU6dFtJRvN_0nlYqoSUG6KlSutrOnvjVbtB3sGZA="
+      AIRFLOW__WEBSERVER__SECRET_KEY: "taz_secret_key"
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      PYTHONPATH: /opt/airflow
     command: airflow scheduler
     volumes:
       - ./dags:/opt/airflow/dags
       - ./extract:/opt/airflow/extract
+      - ./transform:/opt/airflow/transform
+      - ./load:/opt/airflow/load
     networks:
       - hydro_net
 

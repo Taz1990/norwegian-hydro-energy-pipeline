@@ -35,7 +35,10 @@ services: # contaier for the database , name: 'services' can not be changed
 
   # This service runs once to initialize Airflow's metadata tables
   airflow_init:
-    image: apache/airflow:2.7.1-python3.11
+    #image: apache/airflow:2.7.1-python3.11
+    build:
+      context: .
+      dockerfile: Dockerfile
     depends_on:
       postgre_db:
         condition: service_healthy # Waits until your custom tables are created
@@ -51,7 +54,10 @@ services: # contaier for the database , name: 'services' can not be changed
       - hydro_net
 
   airflow_webserver:
-    image: apache/airflow:2.7.1-python3.11
+    #image: apache/airflow:2.7.1-python3.11
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: airflow_webserver
     restart: unless-stopped
     depends_on:
@@ -71,13 +77,18 @@ services: # contaier for the database , name: 'services' can not be changed
       - ./extract:/opt/airflow/extract
       - ./transform:/opt/airflow/transform
       - ./load:/opt/airflow/load
+      - ./dbt/hydro_project:/opt/airflow/dbt
+
     ports:
       - "8080:8080"
     networks:
       - hydro_net
 
   airflow_scheduler:
-    image: apache/airflow:2.7.1-python3.11
+    #image: apache/airflow:2.7.1-python3.11
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: airflow_scheduler
     restart: unless-stopped
     depends_on:
@@ -97,6 +108,9 @@ services: # contaier for the database , name: 'services' can not be changed
       - ./extract:/opt/airflow/extract
       - ./transform:/opt/airflow/transform
       - ./load:/opt/airflow/load
+      - ./.dbt:/home/airflow/.dbt
+      - ./dbt/hydro_project:/opt/airflow/dbt
+
     networks:
       - hydro_net
 

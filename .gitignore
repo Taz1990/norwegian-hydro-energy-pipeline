@@ -219,3 +219,7 @@ __marimo__/
 
 # Ignore raw data downloads
 extract/raw/
+
+# Allow the .dbt configuration directory
+!.dbt/
+!.dbt/profiles.yml

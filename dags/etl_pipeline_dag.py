@@ -13,6 +13,7 @@ from load.postgresql import load_to_postgresql
 # WRAPPER FUNCTIONS
 # -------------------------
 
+
 def run_extract(**context):
     df_path = extract(
         station_id="12.228.0",
@@ -66,7 +67,7 @@ with DAG(
 
     dbt_run = BashOperator(
         task_id="run_dbt",
-        bash_command="cd /opt/airflow && dbt run"
+        bash_command="cd /opt/airflow/dbt && dbt run"
     )
 
     extract_task >> transform_task >> load_task >> dbt_run

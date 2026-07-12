@@ -14,7 +14,7 @@ import pandas as pd
 
 load_dotenv() #to load the API key and docker keys from .env
 
-API_read = os.getenv("NVE-API-KEY") #get API
+API_read = os.getenv("NVE_API_KEY") #get API
 #print(API_read)
 
 #Base api url for observation dataset contains measured values
@@ -59,8 +59,8 @@ def fetch_station(station_id, parameter,resolution,days_back=3):
     print(f"Calling NVE API...")
     print(f"Station : {station_id}")
     print(f"Parameter: {parameter}")
-    print(f"Last {days_back} days")            
-     
+    print(f"Last {days_back} days") 
+           
     #HTTPS request package            
     response= requests.get (
         base_api_url,
@@ -164,8 +164,16 @@ def extract(station_id, parameter,resolution,days_back=3):
 
     # Step 3 — Convert JSON to DataFrame
     df = json_to_data_frame(data)
-
-    return df, file_name
+    
+    # Detect if running inside Airflow
+    #running_in_airflow = os.getenv("AIRFLOW__CORE__EXECUTOR") is not None
+    running_in_airflow = "AIRFLOW_HOME" in os.environ
+    if running_in_airflow:
+        # Airflow-safe return (JSON-serializable)
+        return file_name
+    else:
+        # Local testing return
+        return df, file_name
 
 if __name__ == "__main__":
     if API_read:

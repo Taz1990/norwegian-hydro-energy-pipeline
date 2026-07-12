@@ -1,82 +1,73 @@
-#######..........Block 6: Transform or clean extracted data......#######
+####### ..........Block 6: Transform or clean extracted data......#######
+import json
 import pandas as pd
 import os
 
 
 def clean_dataframe(df):
-    # Extract nested observations
-    observations = df["data"][0]["observations"]
-    obs_df = pd.DataFrame(observations)
 
-    # Convert time column to datetime
-    obs_df["time"] = pd.to_datetime(obs_df["time"])
+    # Step 1: convert time column to datetime
+    df['time'] = pd.to_datetime(df['time'])
 
-    # Add station metadata (correct JSON structure)
-    station_id = df["data"][0]["stationId"]
-    station_name = df["data"][0]["stationName"]
-    unit = df["data"][0]["unit"]
-    load_timestamp = pd.Timestamp.now()
+    # Step 2: sort by time
+    df = df.sort_values('time')
 
-    obs_df["station_id"] = station_id
-    obs_df["station_name"] = station_name
-    obs_df["unit"] = unit
-    obs_df["load_timestamp"] = load_timestamp
+    # Step 3: Drop duplicates (station_id + time = unique key)
+    df = df.drop_duplicates(subset=['station_id', 'time'])
 
-    return obs_df
+    # Step 4: Add load timestamp
+    df['load_timestamp'] = pd.Timestamp.now('UTC')
 
+    # Step 5: Reset index
+    df = df.reset_index(drop=True)
+    return df
 
 
 def transform(input_data):
-    """
-    Dual-mode transform:
-    - Airflow: input_data = file_name (string)
-    - Local:   input_data = DataFrame OR file_name
-    """
     if input_data is None:
         print("Transform skipped: no input data")
         return None
 
-    # If input_data is a file path → read JSON
-    if isinstance(input_data, str):
-        df = pd.read_json(input_data)
-    else:
-        # If input_data is a DataFrame → use it directly
-        df = input_data
+    running_in_airflow = "AIRFLOW_HOME" in os.environ
 
-    # Clean the DataFrame
-    clean_df = clean_dataframe(df)
+    if running_in_airflow:
+        # input_data is a file path to RAW JSON
+        with open(input_data, "r") as f:
+            raw = json.load(f)
 
-    # Airflow needs JSON-safe output for XCom
-    if "AIRFLOW_HOME" in os.environ:
+        observations = raw["data"][0]["observations"]
+        df = pd.DataFrame(observations)
+
+        df["station_id"] = raw["data"][0]["stationId"]
+        df["station_name"] = raw["data"][0]["stationName"]
+        df["unit"] = raw["data"][0]["unit"]
+
+        clean_df = clean_dataframe(df)
         return clean_df.to_json()
 
-    # Local mode returns a DataFrame
-    return clean_df
+    else:
+        df = input_data
+        clean_df = clean_dataframe(df)
+        return clean_df
 
 
 def run_transform(input_data):
     return transform(input_data)
 
+
 if __name__ == "__main__":
     from extract.NVEapi import extract
-    from transform.clean import transform
+
     df, file_name = extract(
-            station_id= '12.228.0',
-            parameter= '1001',
-            resolution= '60',
-            days_back= 3
-        )
-    print(df.keys())
-    print(df["data"][0].keys())   
-    clean_data = transform(file_name)
-    print(clean_data.head)
-    
+        station_id='12.228.0',
+        parameter='1001',
+        resolution='60',
+        days_back=3
+    )
+
+    # Local mode: pass DataFrame directly
+    clean_data = transform(df)
+
+    print(clean_data.head())
     print(len(clean_data))
     print(clean_data[:3])
-    print(df.keys())
-    print(df["data"][0].keys())
-
-'''
-As extract is outside transform folder it will show module not found error if we will run this programm directly
-To avoid it run "python -m transform.clean" inside terminal as a command.
-'''

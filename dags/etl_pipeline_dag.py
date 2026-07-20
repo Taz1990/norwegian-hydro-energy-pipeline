@@ -3,42 +3,72 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.operators.bash import BashOperator
 from datetime import datetime
+import os
 
-# Import your ETL functions
+# Import ETL functions
 from extract.NVEapi import extract
 from transform.clean import transform
 from load.postgresql import load_to_postgresql
 
-# -------------------------
-# WRAPPER FUNCTIONS
-# -------------------------
+
+# EXTRACT
 
 
 def run_extract(**context):
-    df_path = extract(
-        station_id="12.228.0",
-        parameter="1001",
-        resolution="60",
-        days_back=3
-    )
+    # Read stations from environment variable
+    # if STATIONS is empty take it as a default station
+    stations_env = os.getenv("STATIONS", "12.228.0:Kistefoss")
+    stations = [s.split(":")[0] for s in stations_env.split(",")]
 
-    if df_path is None:
-        raise AirflowSkipException("No data returned from API")
+    results = []
 
-    return df_path
+    for station in stations:
+        df_path = extract(
+            station_id=station,
+            parameter="1001",
+            resolution="60",
+            days_back=3
+        )
+
+        if df_path is None:
+            print(f"No data for station {station}. Skipping.")
+            continue
+
+        results.append(df_path)
+
+    if not results:
+        raise AirflowSkipException("No data returned from API for any station")
+
+    return results
 
 
-def run_transform(input_data):
-    return transform(input_data)
+# TRANSFORM
+
+def run_transform(**context):
+    # Pull list of raw file paths from extract_task
+    input_paths = context['ti'].xcom_pull(task_ids='extract_task')
+
+    clean_results = []
+
+    for path in input_paths:
+        clean_json = transform(path)
+        clean_results.append(clean_json)
+
+    return clean_results
 
 
-def run_load(clean_json):
-    return load_to_postgresql(clean_json)
+# LOAD
 
+def run_load(**context):
+    clean_json_list = context['ti'].xcom_pull(task_ids='transform_task')
 
-# -------------------------
+    for clean_json in clean_json_list:
+        load_to_postgresql(clean_json)
+
+    return "Load complete"
+
 # DAG DEFINITION
-# -------------------------
+
 
 with DAG(
     dag_id="hydro_etl_pipeline",
@@ -55,14 +85,12 @@ with DAG(
 
     transform_task = PythonOperator(
         task_id="transform_task",
-        python_callable=run_transform,
-        op_args=["{{ ti.xcom_pull(task_ids='extract_task') }}"]
+        python_callable=run_transform
     )
 
     load_task = PythonOperator(
         task_id="load_task",
-        python_callable=run_load,
-        op_args=["{{ ti.xcom_pull(task_ids='transform_task') }}"]
+        python_callable=run_load
     )
 
     dbt_run = BashOperator(

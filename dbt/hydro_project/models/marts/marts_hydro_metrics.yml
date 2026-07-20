@@ -1,0 +1,15 @@
+version: 2
+
+models:
+  - name: marts_hydro_metrics
+    description: "Final analytics table for hydro discharge metrics"
+    columns:
+      - name: station_id
+        tests:
+          - not_null
+      - name: date
+        tests:
+          - not_null
+      - name: avg_discharge
+        tests:
+          - not_null

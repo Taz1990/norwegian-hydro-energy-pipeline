@@ -1,0 +1,15 @@
+version: 2
+
+models:
+  - name: core_daily_summary
+    description: "Daily aggregated discharge metrics per station"
+    columns:
+      - name: station_id
+        tests:
+          - not_null
+      - name: date
+        tests:
+          - not_null
+      - name: avg_discharge
+        tests:
+          - not_null

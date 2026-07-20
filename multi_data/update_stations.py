@@ -26,13 +26,14 @@ PG_USER = os.getenv("PG_USER")
 PG_PASSWORD = os.getenv("PG_PASSWORD")
 
 # Format in .env:
-# STATIONS=12.228.0:Kistefoss,12.131.0:Hønefoss,12.214.0:Randselva
+# STATIONS=06.20.0:Mandalselva, 07.30.0:Otra, 06.40.0:Sira, 20.5.0:Orkla,29.1.0:Bjerkreimselva
 raw_stations = os.getenv("STATIONS").split(",")
 
 STATIONS = {}
 for item in raw_stations:
     station_id, station_name = item.split(":")
     STATIONS[station_id] = station_name
+
 
 def update_stations_table():
     conn = psycopg2.connect(
@@ -54,7 +55,8 @@ def update_stations_table():
             data = response.json()["data"][0]
             station_name = data["stationName"]
         else:
-            logging.warning(f"No live data for {station_id}, using fallback name.")
+            logging.warning(
+                f"No live data for {station_id}, using fallback name.")
             station_name = fallback_name
 
         cur.execute("""
@@ -68,6 +70,7 @@ def update_stations_table():
     conn.close()
 
     logging.info("Stations table updated successfully.")
+
 
 if __name__ == "__main__":
     update_stations_table()

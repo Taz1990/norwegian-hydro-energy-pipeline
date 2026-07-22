@@ -117,10 +117,10 @@ The dashboard includes:
 * docker-compose up –d
 
 This launches:
-	-	PostgreSQL
-	-	Airflow scheduler 
-	-	Airflow webserver 
-	-	Airflow init container 
+	- PostgreSQL 
+	- Airflow scheduler   
+	- Airflow webserver   
+	- Airflow init container   
 	
 5. Access Airflow    
 Open the UI: http://localhost:8080
@@ -142,15 +142,15 @@ Airflow will orchestrate:
 	•	Deploy the pipeline to Azure. 
 
 ## Skills Demonstrated
-	- **API ingestion** — Building Python clients to retrieve real time and historical hydrological data from REST APIs. 
-	- **ELT pipeline design** — Designing modular extract  load  transform workflows using modern best practices. 
-	- **SQL data modeling** — Structuring raw, staging, core and mart schemas for analytical workloads. 
-	- **dbt transformations** — Implementing Jinja SQL models, staging views, core summaries and mart tables. 
-	- **Airflow orchestration** — Scheduling and managing multi step ELT pipelines with task dependencies. 
-	- **PostgreSQL warehousing** — Managing a containerized warehouse for raw and transformed hydrological data. 	
-	- **Dockerized development** — Running Airflow, PostgreSQL and dbt in isolated, reproducible containers. 
-	- **Streamlit dashboarding** — Building interactive dashboards with charts, metrics and trend indicators. 
-	- **Working with real Norwegian hydrological data** — Handling real world environmental datasets from NVE HydAPI.
+-**API ingestion** — Building Python clients to retrieve real time and historical hydrological data from REST APIs.   
+-**ELT pipeline design** — Designing modular extract  load  transform workflows using modern best practices.   
+-**SQL data modeling** — Structuring raw, staging, core and mart schemas for analytical workloads.     
+-**dbt transformations** — Implementing Jinja SQL models, staging views, core summaries and mart tables.   
+-**Airflow orchestration** — Scheduling and managing multi step ELT pipelines with task dependencies.     
+-**PostgreSQL warehousing** — Managing a containerized warehouse for raw and transformed hydrological data.   	
+-**Dockerized development** — Running Airflow, PostgreSQL and dbt in isolated, reproducible containers.   
+-**Streamlit dashboarding** — Building interactive dashboards with charts, metrics and trend indicators.   
+-**Working with real Norwegian hydrological data** — Handling real world environmental datasets from NVE HydAPI.  
 
 ## Conclusion
 This project demonstrates my practical data engineering skills through a complete pipeline built around real public data. It shows my experience with ingestion, loading, transformation, orchestration and visualization, making it a strong portfolio project for junior data engineering roles.

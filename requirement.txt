@@ -1,26 +1,31 @@
-# ── Norwegian Hydro-Energy Pipeline ──────────────────
-# Python 3.12.10
+# ───────────────────────────────────────────────
+# Norwegian Hydro‑Energy Pipeline
+# Python 3.12.x
+#
+# System Requirements (not installed via pip)
+# Docker >= 27.0
+# Docker Compose >= 2.27
+# Used to run Airflow, PostgreSQL, and supporting services
+# ───────────────────────────────────────────────
 
-# ── Extract + Transform ─────────────────────
-requests==2.32.5          # HTTP API calls — NVE HydAPI
-pandas==3.0.3             # Data cleaning and reshaping
-python-dotenv==1.1.0      # Read .env file for secrets
+# ── Extract + Transform (Python) ───────────────
+requests==2.32.3            # API calls to NVE HydAPI
+pandas==2.2.2               # Data cleaning + shaping
+python-dotenv==1.0.1        # Load environment variables
 
-# ── Load ─────────────────────────────────────
-sqlalchemy==2.0.41        # Connect Python to PostgreSQL
-psycopg2-binary==2.9.10   # PostgreSQL driver
+# ── Load (Database Connectivity) ───────────────
+sqlalchemy==2.0.29          # PostgreSQL ORM/connection engine
+psycopg2-binary==2.9.9      # PostgreSQL driver
 
-# ── Orchestration ────────────────────────────
-# apache-airflow==3.0.2   # Install via Docker — not pip
-# See airflow/docker-compose.yml
+# ── Orchestration (Airflow via Docker) ─────────
+# apache-airflow is NOT installed via pip.
+# Airflow runs inside Docker containers.
+# See: airflow/docker-compose.yml
 
-# ── Transform inside DB ──────────────────────
-dbt-core==1.11.11         # SQL transformation framework
-dbt-postgres==1.10.0      # dbt PostgreSQL adapter
+# ── dbt (SQL Transformations) ───────────────────
+dbt-core==1.7.6             # dbt core engine
+dbt-postgres==1.7.6         # PostgreSQL adapter for dbt
 
-# ── Big data processing ──────────────────────
-pyspark==4.0.0            # Distributed data processing
-
-# ──  Dashboard ────────────────────────────────
-streamlit==1.45.1         # Interactive web dashboard
-plotly==6.1.2             # Charts and visualisations
+# ── Dashboard (Frontend) ────────────────────────
+streamlit==1.35.0           # Interactive dashboard
+plotly==5.22.0              # Charts + visualizations

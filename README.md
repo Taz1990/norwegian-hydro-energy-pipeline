@@ -16,15 +16,15 @@ The aim of this project is to demonstrate my core data engineering skills using 
 <img width="424" height="415" alt="image" src="https://github.com/user-attachments/assets/6354d7fa-2e64-4a96-8b31-38506ebc59d1" />
 
 ## Tech Stack:
-** Data Ingestion ** -
+**Data Ingestion** -
 Python, requests, NVE HydAPI - Extract hydrological discharge data from the Norwegian Water Resources API
-** Storage ** -
+**Storage** -
 PostgreSQL, Docker - Store raw, staging, core, and mart schemas in a containerized database
-** Transformation ** -
+**Transformation** -
 dbt, Jinja SQL models - Transform raw data into clean analytics tables with data quality tests
-** Orchestration **
+**Orchestration**
 Apache Airflow - Schedule and manage ETL tasks across extract, transform, and load stages
-** Processing & Serving **
+**Processing & Serving**
 Streamlit -	Compute metrics and visualize trends through interactive dashboards
 
 ## Data Source:

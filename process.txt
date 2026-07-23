@@ -1,17 +1,75 @@
-extract/nve.py
-    Block 1  ->  imports + setup
-    Block 2  ->  fetch from API
-    Block 3  -> save raw JSON
-    Block 4  ->  convert to DataFrame
-    Block 5  ->  main extract() function
+1. Extract 
+File: extract/nve.py 
+Block 1 — Imports + Setup 
 
-transform/clean.py
-    clean columns
-    fix data types
-    filter quality >= 2
-    return clean DataFrame
+Load required libraries (requests, pandas, dotenv). 
 
-load/postgres.py
-    connect to PostgreSQL
-    write DataFrame to table
-    confirm rows loaded
+Read API credentials and environment variables. 
+
+Define base URL and request parameters.
+
+Block 2 — Fetch from NVE HydAPI
+
+Call REST API endpoint.
+
+Retrieve JSON response containing hydrological observations + metadata.
+
+Block 3 — Save Raw JSON
+
+Write the raw API response to disk (raw/ folder).
+
+Preserve exact structure for reproducibility and debugging.
+
+Block 4 — Convert to DataFrame
+
+Parse JSON into a structured pandas DataFrame.
+
+Extract observations, timestamps, station metadata.
+
+Block 5 — extract() Main Function
+
+Orchestrates the full extraction flow.
+
+Returns (df, file_name) for downstream processing.
+
+2. Transform
+File: transform/clean.py
+Cleaning Steps
+
+Standardize column names.
+
+Convert timestamps to proper datetime format.
+
+Cast numeric fields (value, quality) to correct types.
+
+Filter out low‑quality observations (quality >= 2).
+
+Add metadata fields (station_id, station_name, unit, load_timestamp).
+
+Output
+
+Returns a clean DataFrame ready for loading into PostgreSQL.
+
+In Airflow mode: returns JSON for XCom.
+
+3. Load
+File: load/postgres.py
+Database Connection
+
+Read PostgreSQL credentials from .env.
+
+Create connection using psycopg2 + sqlalchemy.
+
+Insert Logic
+
+Ensure station exists in stations table (ON CONFLICT DO NOTHING).
+
+Insert cleaned observations into raw_discharge table.
+
+Use execute_values for fast bulk inserts.
+
+Confirmation
+
+Commit transaction.
+
+Return number of rows successfully loaded.

@@ -8,9 +8,11 @@ Norway relies heavily on hydropower and river discharge is one of the most impor
 
 ## Goal: 
 
-The aim of this project is to demonstrate my core data engineering skills using a realistic data source and a production-style workflow: extraction, loading, transformation, orchestration, warehousing and visualization.
-<img width="407" height="398" alt="dashboard1" src="https://github.com/user-attachments/assets/37234f92-a1ea-42ea-913d-1b483738de45" />
+The aim of this project is to demonstrate my core data engineering skills using a realistic data source and a production-style workflow: extraction, loading, transformation, orchestration, warehousing and visualization.  
+
 <img width="953" height="419" alt="airflow3" src="https://github.com/user-attachments/assets/ad90fce1-4a0b-497b-9720-ef8f7b00da3d" />
+<img width="407" height="398" alt="dashboard1" src="https://github.com/user-attachments/assets/37234f92-a1ea-42ea-913d-1b483738de45" />
+
 
 
 ## Key Features:

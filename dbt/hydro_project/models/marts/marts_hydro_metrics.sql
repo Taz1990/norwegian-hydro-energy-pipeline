@@ -1,15 +1,21 @@
-{{ config(materialized='table') }}
+{{ config
+(materialized='table') }}
 
-with daily as (
-    select *
-    from {{ ref('core_daily_summary') }}
+with
+    daily
+    as
+    (
+        select *
+        from {{ ref
+    ('core_daily_summary') }}
 ),
 
-stations as (
+stations as
+(
     select
-        station_id,
-        station_name
-    from {{ source('postgres', 'stations') }}
+    STATION_ID,
+    STATION_NAME
+from {{ source('raw', 'STATIONS') }}
 )
 
 select
@@ -26,5 +32,5 @@ select
             order by d.date
         ) as discharge_trend
 from daily d
-left join stations s
+    left join stations s
     on d.station_id = s.station_id

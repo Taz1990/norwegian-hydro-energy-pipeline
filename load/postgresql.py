@@ -116,7 +116,7 @@ if __name__ == "__main__":
     df, file_name = extract(
         station_id='12.228.0',
         parameter='1001',
-        resolution='60',
+        resolution='1440',
         days_back=3
     )
     clean_data = transform(df)

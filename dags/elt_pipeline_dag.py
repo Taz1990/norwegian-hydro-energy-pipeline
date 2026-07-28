@@ -26,7 +26,7 @@ def run_extract(**context):
         df_path = extract(
             station_id=station,
             parameter="1001",
-            resolution="60",
+            resolution="1440",
             days_back=3
         )
 
@@ -71,12 +71,12 @@ def run_load(**context):
 
 
 with DAG(
-    dag_id="hydro_etl_pipeline",
+    dag_id="hydro_elt_pipeline",
     start_date=datetime(2024, 1, 1),
     schedule_interval="@daily",
     catchup=False,
-    tags=["hydrology", "etl", "nve"]
-):
+    tags=["hydrology", "elt", "nve"]
+) as dag:
 
     extract_task = PythonOperator(
         task_id="extract_task",

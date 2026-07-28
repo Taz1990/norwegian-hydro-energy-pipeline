@@ -26,7 +26,7 @@ PG_USER = os.getenv("PG_USER")
 PG_PASSWORD = os.getenv("PG_PASSWORD")
 
 # Format in .env:
-# STATIONS=06.20.0:Mandalselva, 07.30.0:Otra, 06.40.0:Sira, 20.5.0:Orkla,29.1.0:Bjerkreimselva
+# STATIONS=12.228.0:Kistefoss, 29.4.0:Aspervik, 15.250.0:Glomma, 15.70.0:Trysilelva
 raw_stations = os.getenv("STATIONS").split(",")
 
 STATIONS = {}

@@ -10,12 +10,13 @@ from extract.NVEapi import extract
 from transform.clean import transform
 from load.postgresql import load_to_postgresql
 from dotenv import load_dotenv
-import os 
+import os
 
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s | %(levelname)s | %(message)s"
 )
+
 
 def multi_station_pipeline(stations, days_back=3):
     total_rows = 0
@@ -26,9 +27,9 @@ def multi_station_pipeline(stations, days_back=3):
         result = extract(
             station_id=station,
             parameter="1001",
-            resolution="60",
+            resolution="1440",
             days_back=3
-    )
+        )
 
         if result is None:
             logging.warning(f"No data for station {station}. Skipping.")
@@ -38,7 +39,7 @@ def multi_station_pipeline(stations, days_back=3):
 
         clean_df = transform(df)
         rows = load_to_postgresql(clean_df)
-        
+
         logging.info(f'Extraction complete. Raw file saved: {file_name}')
         logging.info(f"Inserted {rows} rows for station {station}")
         total_rows += rows
@@ -48,7 +49,7 @@ def multi_station_pipeline(stations, days_back=3):
 
 
 if __name__ == "__main__":
-    
+
     load_dotenv()
 
     raw_stations = os.getenv("STATIONS").split(",")

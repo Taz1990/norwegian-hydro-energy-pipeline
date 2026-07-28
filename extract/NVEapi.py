@@ -1,27 +1,27 @@
-                    #####....Block-1: import+load....######
+##### ....Block-1: import+load....######
 """To extract data from web API, download raw data, load api key"""
 
 import requests
-import  os
+import os
 from dotenv import load_dotenv
 
-#for block-3
+# for block-3
 from datetime import datetime
 import json
 import logging
 import pandas as pd
 ###############################
 
-load_dotenv() #to load the API key and docker keys from .env
+load_dotenv()  # to load the API key and docker keys from .env
 
-API_read = os.getenv("NVE_API_KEY") #get API
-#print(API_read)
+API_read = os.getenv("NVE_API_KEY")  # get API
+# print(API_read)
 
-#Base api url for observation dataset contains measured values
+# Base api url for observation dataset contains measured values
 base_api_url = "https://hydapi.nve.no/api/v1/Observations"
 
-##run this if condition after Block 1 & comment it after Block 2 if condition...........
-#now check api & url
+# run this if condition after Block 1 & comment it after Block 2 if condition...........
+# now check api & url
 ''' 
 if __name__ == "__main__":
     if API_read:
@@ -31,11 +31,9 @@ if __name__ == "__main__":
         print("Error! NO API found in .env")
 '''
 
+##### ....Block-2: Data fetch from API ....#####
+# To get hourly water flow readings from the Kistefoss station on the Randselva river for the last 3 days'''
 
-
-                #####....Block-2: Data fetch from API ....#####
-# To get hourly water flow readings from the Kistefoss station on the Randselva river for the last 3 days'''               
- 
 """
     Fetch observations for one NVE station.
 
@@ -43,43 +41,45 @@ if __name__ == "__main__":
     parameter   : the data type     e.g. "1001" = discharge
     resolution  : time interval     e.g. "60"   = hourly
     days_back   : how many days     e.g. 3      = last 3 days
-"""               
-def fetch_station(station_id, parameter,resolution,days_back=3):              
-                
-    headers= { 'X-API-KEY': API_read,
+"""
+
+
+def fetch_station(station_id, parameter, resolution, days_back=3):
+
+    headers = {'X-API-KEY': API_read,
                'accept': 'application/json'
-            }  
-    params= {
+               }
+    params = {
         "StationId": station_id,
         "Parameter": parameter,
         "ResolutionTime": resolution,
         "ReferenceTime": f'P{days_back}D/'
-            }              
-                
+    }
+
     print(f"Calling NVE API...")
     print(f"Station : {station_id}")
     print(f"Parameter: {parameter}")
-    print(f"Last {days_back} days") 
-           
-    #HTTPS request package            
-    response= requests.get (
+    print(f"Last {days_back} days")
+
+    # HTTPS request package
+    response = requests.get(
         base_api_url,
         headers=headers,
         params=params,
         timeout=30
-    )     
-    
-    print(f"status code: {response.status_code}") 
-    
+    )
+
+    print(f"status code: {response.status_code}")
+
     # If API returns 404 or any non-200 → return None
     if response.status_code != 200:
         print(f"No data found for station {station_id}.")
         return None
-    
-    return response.json()
-      
 
-###............. Block-3: Save raw JSON...............###
+    return response.json()
+
+
+### ............. Block-3: Save raw JSON...............###
 """
     Save raw API response to a JSON file.
     Always save before transforming anything.
@@ -88,42 +88,48 @@ def fetch_station(station_id, parameter,resolution,days_back=3):
     station_id : used in the filename so you know
                  which station this file belongs to
 """
-def save_raw(data,station_id):
-    
+
+
+def save_raw(data, station_id):
+
     # Create a timestamp so every file has a unique name
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    
+
     # Clean the station_id for use in filename
     # 12.228.0 becomes 12_228_0 (dots not allowed in filenames)
-    clean_station_id = station_id.replace('.','_')
-    
+    clean_station_id = station_id.replace('.', '_')
+
     # Create the filename
     file_name = f"extract/raw/discharge_{clean_station_id}_{timestamp}.json"
-    
+
     # Write the data to the file
     with open(file_name, 'w') as f:
         json.dump(data, f, indent=2)
-    
-    #print(f'Raw data saved: {file_name}')
-    
+
+    # print(f'Raw data saved: {file_name}')
+
     return file_name
 
-                    #######............. Block-4...........########
+
+    ####### ............. Block-4...........########
 """
     Convert raw NVE JSON into a flat pandas DataFrame.
 """
+
+
 def json_to_data_frame(data):
-    
-    #Step-1: first station
+
+    # Step-1: first station
     station = data['data'][0]
-    station_id = station['stationId'] # to avoid key error the key name must have to be same as json key like stationID, unit
+    # to avoid key error the key name must have to be same as json key like stationID, unit
+    station_id = station['stationId']
     station_name = station['stationName']
     unit = station['unit']
-    
-    #Step 2: list of observation
+
+    # Step 2: list of observation
     observation = station['observations']
-    
-    #Stetp 3: building rows
+
+    # Stetp 3: building rows
     rows = []
     for obs in observation:
         rows.append({
@@ -135,26 +141,29 @@ def json_to_data_frame(data):
             'quality': obs['quality'],
             'unit': unit
         })
-     #Step 4: convert into dataframe   
+     # Step 4: convert into dataframe
     df = pd.DataFrame(rows)
     return df
 
-###............. Block-5: Main extract() function ...............###
+
+### ............. Block-5: Main extract() function ...............###
 """
     Full extract process:
     1. Fetch raw JSON from NVE API
     2. Save raw JSON to file
     3. Convert JSON to pandas DataFrame
 """
-def extract(station_id, parameter,resolution,days_back=3):
-    #Step-1: Fetch data
+
+
+def extract(station_id, parameter, resolution, days_back=3):
+    # Step-1: Fetch data
     data = fetch_station(
-        station_id= station_id,
-        parameter= parameter,
-        resolution= resolution,
-        days_back= days_back
+        station_id=station_id,
+        parameter=parameter,
+        resolution=resolution,
+        days_back=days_back
     )
-     #  If API returned no data (404), skip this station
+    #  If API returned no data (404), skip this station
     if data is None:
         print(f"No data for station {station_id}. Skipping.")
         return None
@@ -164,9 +173,9 @@ def extract(station_id, parameter,resolution,days_back=3):
 
     # Step 3 — Convert JSON to DataFrame
     df = json_to_data_frame(data)
-    
+
     # Detect if running inside Airflow
-    #running_in_airflow = os.getenv("AIRFLOW__CORE__EXECUTOR") is not None
+    # running_in_airflow = os.getenv("AIRFLOW__CORE__EXECUTOR") is not None
     running_in_airflow = "AIRFLOW_HOME" in os.environ
     if running_in_airflow:
         # Airflow-safe return (JSON-serializable)
@@ -175,26 +184,27 @@ def extract(station_id, parameter,resolution,days_back=3):
         # Local testing return
         return df, file_name
 
+
 if __name__ == "__main__":
     if API_read:
         print(f"The API Key is: {API_read[:6]}")
         print(f'The base api url is: {base_api_url}')
-        
+
         print('\nExtract Start!!!!')
-         #for block 5 extract
+        # for block 5 extract
         df, file_name = extract(
-            station_id= '12.228.0',
-            parameter= '1001',
-            resolution= '60',
-            days_back= 3
+            station_id='12.228.0',
+            parameter='1001',
+            resolution='1440',
+            days_back=3
         )
     else:
         print('There is an error! in .env')
-    
-    ##### for block-2 fetch dat.....   
-    # Fetch real data — Kistefoss station, Randselva 
+
+    # for block-2 fetch dat.....
+    # Fetch real data — Kistefoss station, Randselva
     # Parameter 1001 = river discharge in m³/s
-    ### we do not need this after running block 5 it will make repetation, butto check for block 1 we can keep it for block 1 to check only
+    # we do not need this after running block 5 it will make repetation, butto check for block 1 we can keep it for block 1 to check only
     '''
     data = fetch_station(
         station_id= "12.228.0",
@@ -203,21 +213,20 @@ if __name__ == "__main__":
         days_back= 3
         )
     '''
-    
-    
-    #### for block-3 save data......
-    #file_name = save_raw(data, '12.228.0')
-    
-    #### for block-4 pandas data
-    #df = json_to_data_frame(data)
-    
+
+    # for block-3 save data......
+    # file_name = save_raw(data, '12.228.0')
+
+    # for block-4 pandas data
+    # df = json_to_data_frame(data)
+
     # print the return values
-    #after calling extract() (Block 5) we do not need it
-    #print(f'\nTop level keys: {list(data.keys())}') 
-    #print(f'Item count: {data.get('itemCount')}')
-    
+    # after calling extract() (Block 5) we do not need it
+    # print(f'\nTop level keys: {list(data.keys())}')
+    # print(f'Item count: {data.get('itemCount')}')
+
     # First series
-    #####......after calling extract() (Block 5) we do not need it.....####
+    ##### ......after calling extract() (Block 5) we do not need it.....####
     '''
     first = data["data"][0]
     print(f"\nStation name : {first['stationName']}")
@@ -233,11 +242,11 @@ if __name__ == "__main__":
                 f" correction: {obs['correction']} "
                 f"quality: {obs['quality']}")
     '''
-    #after block 5
+    # after block 5
     print(f'Raw file saved: {file_name}')
     print('\nExtract complete')
-    
-    #after block 4    
+
+    # after block 4
     print('\nData Frame preview: ')
     print(df.head())
     print(f"\nShape: {df.shape}")

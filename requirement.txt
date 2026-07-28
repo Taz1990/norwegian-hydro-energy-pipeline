@@ -8,6 +8,7 @@
 # Used to run Airflow, PostgreSQL, and supporting services
 # ───────────────────────────────────────────────
 
+
 # ── Extract + Transform (Python) ───────────────
 requests==2.32.3            # API calls to NVE HydAPI
 pandas==2.2.2               # Data cleaning + shaping
@@ -16,11 +17,24 @@ python-dotenv==1.0.1        # Load environment variables
 # ── Load (Database Connectivity) ───────────────
 sqlalchemy==2.0.29          # PostgreSQL ORM/connection engine
 psycopg2-binary==2.9.9      # PostgreSQL driver
+=======
+# ── Extract + Transform ─────────────────────
+requests==2.32.5          # HTTP API calls — NVE HydAPI
+pandas==3.0.3             # Data cleaning and reshaping
+python-dotenv==1.2.2      # Read .env file for secrets
+
+# ── Load ─────────────────────────────────────
+sqlalchemy==2.0.51          # Connect Python to PostgreSQL
+# psycopg2-binary==2.9.12   # PostgreSQL driver
+snowflake-connector-python==4.7.1
+snowflake-sqlalchemy==1.11.0
+
 
 # ── Orchestration (Airflow via Docker) ─────────
 # apache-airflow is NOT installed via pip.
 # Airflow runs inside Docker containers.
 # See: airflow/docker-compose.yml
+
 
 # ── dbt (SQL Transformations) ───────────────────
 dbt-core==1.7.6             # dbt core engine
@@ -29,3 +43,12 @@ dbt-postgres==1.7.6         # PostgreSQL adapter for dbt
 # ── Dashboard (Frontend) ────────────────────────
 streamlit==1.35.0           # Interactive dashboard
 plotly==5.22.0              # Charts + visualizations
+=======
+# ── Transform inside DB ──────────────────────
+dbt-core==1.12.0b3         # SQL transformation framework
+# dbt-postgres==1.10.0      # dbt PostgreSQL adapter
+dbt-snowflake==1.12.0
+
+# ──  Dashboard ────────────────────────────────
+streamlit==1.59.2         # Interactive web dashboard
+

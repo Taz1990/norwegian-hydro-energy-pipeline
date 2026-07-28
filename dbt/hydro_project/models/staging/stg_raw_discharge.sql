@@ -7,15 +7,13 @@ with
     as
     (
         select
-            station_id,
-            station_name,
-            time,
-            value,
-            quality,
-            unit,
-            load_timestamp
-        from {{ source
-    ('postgres', 'raw_discharge') }}
+            STATION_ID,
+            TIMESTAMP ,
+            VALUE,
+            QUALITY,
+            UNIT,
+            LOAD_TIMESTAMP
+        from {{ source('raw', 'RAW_DISCHARGE') }}
 ),
 
 deduped as
@@ -23,19 +21,18 @@ deduped as
     select
     *,
     row_number() over (
-            partition by station_id, time
-            order by load_timestamp desc
+            partition by STATION_ID, TIMESTAMP
+            order by LOAD_TIMESTAMP desc
         ) as rn
 from source
 )
 
 select
-    station_id,
-    station_name,
-    time,
-    value::float as value,
-    quality,
-    unit,
-    load_timestamp
+    STATION_ID,
+    TIMESTAMP as time,
+    VALUE::float as value,
+    QUALITY,
+    UNIT,
+    LOAD_TIMESTAMP
 from deduped
 where rn = 1

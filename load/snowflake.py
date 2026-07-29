@@ -6,6 +6,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
+# -----------------------------
+# CONNECTION
+# -----------------------------
 def get_snowflake_connection():
     return snowflake.connector.connect(
         user=os.getenv("SNOWFLAKE_USER"),
@@ -17,27 +20,54 @@ def get_snowflake_connection():
     )
 
 
+# -----------------------------
+# ENSURE STATION EXISTS (Snowflake-safe)
+# -----------------------------
 def ensure_station_exists(conn, station_id, station_name):
     cursor = conn.cursor()
+
+    # Snowflake does NOT support ON CONFLICT → use MERGE
     cursor.execute("""
-        INSERT INTO RAW.STATIONS (station_id, station_name)
-        VALUES (%s, %s)
-        ON CONFLICT (station_id) DO NOTHING
-    """, (station_id, station_name))
+        MERGE INTO RAW.STATIONS AS target
+        USING (SELECT %(station_id)s AS station_id, %(station_name)s AS station_name) AS source
+        ON target.STATION_ID = source.station_id
+        WHEN NOT MATCHED THEN
+            INSERT (STATION_ID, STATION_NAME)
+            VALUES (source.station_id, source.station_name)
+    """, {
+        "station_id": station_id,
+        "station_name": station_name
+    })
+
     cursor.close()
 
 
-def load_to_snowflake(df):
+# -----------------------------
+# LOAD SINGLE RECORD (Airflow uses this)
+# -----------------------------
+def load_record_to_snowflake(record):
     conn = get_snowflake_connection()
+    cursor = conn.cursor()
 
-    # Bulk load DataFrame into Snowflake
-    success, nchunks, nrows, _ = write_pandas(
-        conn,
-        df,
-        table_name="RAW_DISCHARGE",
-        database=os.getenv("SNOWFLAKE_DATABASE"),
-        schema="RAW"
-    )
+    cursor.execute("""
+        INSERT INTO RAW.RAW_DISCHARGE (
+            STATION_ID,
+            TIME,
+            VALUE,
+            QUALITY,
+            UNIT,
+            LOAD_TIMESTAMP
+        )
+        VALUES (
+            %(station_id)s,
+            %(time)s,
+            %(value)s,
+            %(quality)s,
+            %(unit)s,
+            %(load_timestamp)s
+        )
+    """, record)
 
+    conn.commit()
+    cursor.close()
     conn.close()
-    return nrows

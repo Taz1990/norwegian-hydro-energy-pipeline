@@ -1,38 +1,35 @@
+{{ config(materialized='view') }}
 
-{{ config
-(materialized='view') }}
-
-with
-    source
-    as
-    (
-        select
-            STATION_ID,
-            TIMESTAMP ,
-            VALUE,
-            QUALITY,
-            UNIT,
-            LOAD_TIMESTAMP
-        from {{ source('raw', 'RAW_DISCHARGE') }}
+with source as (
+    select
+        station_id,
+        timestamp,
+        value,
+        quality,
+        unit,
+        load_timestamp
+    from {{ source('raw', 'RAW_DISCHARGE') }}
+    where station_id is not null
+      and timestamp is not null
+      and value is not null
 ),
 
-deduped as
-(
+deduped as (
     select
-    *,
-    row_number() over (
-            partition by STATION_ID, TIMESTAMP
-            order by LOAD_TIMESTAMP desc
+        *,
+        row_number() over (
+            partition by station_id, timestamp
+            order by load_timestamp desc
         ) as rn
-from source
+    from source
 )
 
 select
-    STATION_ID,
-    TIMESTAMP as time,
-    VALUE::float as value,
-    QUALITY,
-    UNIT,
-    LOAD_TIMESTAMP
+    station_id,
+    timestamp,
+    value,
+    quality,
+    unit,
+    load_timestamp
 from deduped
 where rn = 1

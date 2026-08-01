@@ -1,0 +1,14 @@
+version: 2
+
+models:
+  - name: raw_discharge
+    description: "Raw discharge data loaded directly from Snowflake RAW schema."
+    columns:
+      - name: station_id
+        description: "Unique station identifier."
+
+      - name: timestamp
+        description: "Timestamp of the discharge measurement."
+
+      - name: value
+        description: "Raw discharge value."

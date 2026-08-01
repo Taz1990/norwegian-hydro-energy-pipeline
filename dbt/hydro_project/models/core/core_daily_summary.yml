@@ -2,14 +2,26 @@ version: 2
 
 models:
   - name: core_daily_summary
-    description: "Daily aggregated discharge metrics per station"
+    description: "Daily aggregated discharge metrics per station."
     columns:
       - name: station_id
+        description: "Unique station identifier."
         tests:
           - not_null
+
       - name: date
+        description: "Date of the aggregated measurements."
         tests:
           - not_null
+
       - name: avg_discharge
-        tests:
-          - not_null
+        description: "Average discharge for the day."
+
+      - name: min_discharge
+        description: "Minimum discharge value for the day."
+
+      - name: max_discharge
+        description: "Maximum discharge value for the day."
+
+      - name: measurements
+        description: "Number of raw measurements contributing to the daily summary."

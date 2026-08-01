@@ -1,0 +1,16 @@
+version: 2
+
+models:
+  - name: stg_stations
+    description: "Staging model for station metadata loaded into Snowflake RAW."
+    columns:
+      - name: STATION_ID
+        description: "Unique station identifier."
+        tests:
+          - not_null
+          - unique
+
+      - name: STATION_NAME
+        description: "Human-readable name of the station."
+        tests:
+          - not_null

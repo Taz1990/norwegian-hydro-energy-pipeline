@@ -1,0 +1,21 @@
+version: 2
+
+models:
+  - name: marts_hydro_metrics
+    description: "Final analytics table combining station metadata with daily discharge metrics."
+    columns:
+      - name: station_id
+        description: "Unique station identifier."
+        tests:
+          - not_null
+
+      - name: station_name
+        description: "Human-readable name of the station."
+
+      - name: date
+        description: "Date of the aggregated measurements."
+        tests:
+          - not_null
+
+      - name: discharge_trend
+        description: "Difference between today's and yesterday's average discharge."

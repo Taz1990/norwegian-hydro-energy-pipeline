@@ -1,0 +1,29 @@
+version: 2
+
+models:
+  - name: stg_raw_discharge
+    description: "Staging model that cleans and deduplicates raw discharge measurements from Snowflake RAW."
+    columns:
+      - name: station_id
+        description: "Unique station identifier."
+        tests:
+          - not_null
+
+      - name: timestamp
+        description: "Timestamp of the discharge measurement."
+        tests:
+          - not_null
+
+      - name: value
+        description: "Water discharge value in m³/s."
+        tests:
+          - not_null
+
+      - name: quality
+        description: "Quality flag from the raw API."
+
+      - name: unit
+        description: "Unit of measurement."
+
+      - name: load_timestamp
+        description: "Timestamp when the record was loaded into Snowflake."

@@ -46,10 +46,27 @@ services: # contaier for the database , name: 'services' can not be changed
       - .env
     environment:
       AIRFLOW__CORE__SQL_ALCHEMY_CONN: "postgresql+psycopg2://${PG_USER}:${PG_PASSWORD}@postgre_db:5432/${PG_DATABASE}"
+
+      # SNOWFLAKE ENV VARS
+      SNOWFLAKE_ACCOUNT: ${SNOWFLAKE_ACCOUNT}
+      SNOWFLAKE_USER: ${SNOWFLAKE_USER}
+      SNOWFLAKE_PASSWORD: ${SNOWFLAKE_PASSWORD}
+      SNOWFLAKE_WAREHOUSE: ${SNOWFLAKE_WAREHOUSE}
+      SNOWFLAKE_DATABASE: ${SNOWFLAKE_DATABASE}
+      SNOWFLAKE_SCHEMA: ${SNOWFLAKE_SCHEMA}
+
     # Fix: Put the entrypoint and command into a single valid bash execution block
     command: >
       bash -c "airflow db init && 
       airflow users create --username airflow --password airflow --firstname Admin --lastname Admin --role Admin --email admin@example.com"
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./dbt/hydro_project:/opt/airflow/dbt
+      - ~/.dbt:/home/airflow/.dbt
+      - ./snowflake:/opt/airflow/snowflake
+      - ./load:/opt/airflow/load
+      - ./extract:/opt/airflow/extract
+
     networks:
       - hydro_net
 
@@ -71,13 +88,23 @@ services: # contaier for the database , name: 'services' can not be changed
       AIRFLOW__WEBSERVER__SECRET_KEY: "taz_secret_key"
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       PYTHONPATH: /opt/airflow
+
+      # SNOWFLAKE ENV VARS
+      SNOWFLAKE_ACCOUNT: ${SNOWFLAKE_ACCOUNT}
+      SNOWFLAKE_USER: ${SNOWFLAKE_USER}
+      SNOWFLAKE_PASSWORD: ${SNOWFLAKE_PASSWORD}
+      SNOWFLAKE_WAREHOUSE: ${SNOWFLAKE_WAREHOUSE}
+      SNOWFLAKE_DATABASE: ${SNOWFLAKE_DATABASE}
+      SNOWFLAKE_SCHEMA: ${SNOWFLAKE_SCHEMA}
+
     command: airflow webserver
     volumes:
       - ./dags:/opt/airflow/dags
-      - ./extract:/opt/airflow/extract
-      - ./transform:/opt/airflow/transform
-      - ./load:/opt/airflow/load
       - ./dbt/hydro_project:/opt/airflow/dbt
+      - ~/.dbt:/home/airflow/.dbt
+      - ./snowflake:/opt/airflow/snowflake
+      - ./load:/opt/airflow/load
+      - ./extract:/opt/airflow/extract
 
     ports:
       - "8080:8080"
@@ -102,14 +129,22 @@ services: # contaier for the database , name: 'services' can not be changed
       AIRFLOW__WEBSERVER__SECRET_KEY: "taz_secret_key"
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       PYTHONPATH: /opt/airflow
+
+      # SNOWFLAKE ENV VARS
+      SNOWFLAKE_ACCOUNT: ${SNOWFLAKE_ACCOUNT}
+      SNOWFLAKE_USER: ${SNOWFLAKE_USER}
+      SNOWFLAKE_PASSWORD: ${SNOWFLAKE_PASSWORD}
+      SNOWFLAKE_WAREHOUSE: ${SNOWFLAKE_WAREHOUSE}
+      SNOWFLAKE_DATABASE: ${SNOWFLAKE_DATABASE}
+      SNOWFLAKE_SCHEMA: ${SNOWFLAKE_SCHEMA}
     command: airflow scheduler
     volumes:
       - ./dags:/opt/airflow/dags
-      - ./extract:/opt/airflow/extract
-      - ./transform:/opt/airflow/transform
-      - ./load:/opt/airflow/load
-      - ./.dbt:/home/airflow/.dbt
       - ./dbt/hydro_project:/opt/airflow/dbt
+      - ~/.dbt:/home/airflow/.dbt
+      - ./snowflake:/opt/airflow/snowflake
+      - ./load:/opt/airflow/load
+      - ./extract:/opt/airflow/extract
 
     networks:
       - hydro_net

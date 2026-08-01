@@ -52,7 +52,7 @@ def load_record_to_snowflake(record):
     cursor.execute("""
         INSERT INTO RAW.RAW_DISCHARGE (
             STATION_ID,
-            TIME,
+            TIMESTAMP,
             VALUE,
             QUALITY,
             UNIT,
@@ -60,7 +60,7 @@ def load_record_to_snowflake(record):
         )
         VALUES (
             %(station_id)s,
-            %(time)s,
+            %(timestamp)s,
             %(value)s,
             %(quality)s,
             %(unit)s,
@@ -71,3 +71,4 @@ def load_record_to_snowflake(record):
     conn.commit()
     cursor.close()
     conn.close()
+    print("RECORD RECEIVED BY LOADER:", record)

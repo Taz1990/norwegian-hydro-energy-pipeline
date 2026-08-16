@@ -1,6 +1,6 @@
 # ───────────────────────────────────────────────
 # Norwegian Hydro‑Energy Pipeline
-# Python 3.12.x
+# Python 3.11.4
 #
 # System Requirements (not installed via pip)
 # Docker >= 27.0
